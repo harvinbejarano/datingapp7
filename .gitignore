@@ -404,6 +404,13 @@ FodyWeavers.xsd
 ## Visual studio for Mac
 ##
 
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
 
 # globs
 Makefile.in

@@ -2,16 +2,12 @@
 {
     using DatingApp.Data;
     using DatingApp.Entities;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseApiController
     {
         private readonly DataContext context;
-
         public UsersController(DataContext context)
         {
             this.context = context;
@@ -20,7 +16,7 @@
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers()
         {
-            var users = await context.Users.ToListAsync();
+            var users = await this.context.Users.ToListAsync();
 
             return Ok(users);
         }

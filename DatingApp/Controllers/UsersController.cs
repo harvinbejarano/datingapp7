@@ -2,9 +2,11 @@
 {
     using DatingApp.Data;
     using DatingApp.Entities;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
+    [Authorize]
     public class UsersController : BaseApiController
     {
         private readonly DataContext context;

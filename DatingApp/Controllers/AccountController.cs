@@ -1,6 +1,7 @@
 ﻿using DatingApp.Data;
 using DatingApp.Dtos;
 using DatingApp.Entities;
+using DatingApp.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -11,14 +12,16 @@ namespace DatingApp.Controllers
     public class AccountController : BaseApiController
     {
         private readonly DataContext context;
+        private readonly ITokenService tokenService;
 
-        public AccountController(DataContext context)
+        public AccountController(DataContext context, ITokenService tokenService)
         {
             this.context = context;
+            this.tokenService = tokenService;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AppUser>> Register(RegisterDto userDto)
+        public async Task<ActionResult<UserDto>> Register(RegisterDto userDto)
         {
             if( await UserExists(userDto.Username)) return BadRequest("User name is taken!");
 
@@ -34,11 +37,15 @@ namespace DatingApp.Controllers
             this.context.Users.Add(user);
             await this.context.SaveChangesAsync();
 
-            return user;
+            return new UserDto 
+            {
+                Username = userDto.Username,
+                Token = tokenService.CreateToken (user)
+            };
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AppUser>> Login(LoginDto loginDto)
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
             var user = await this.context.Users.FirstOrDefaultAsync( u => u.UserName == loginDto.Username);
             
@@ -52,7 +59,11 @@ namespace DatingApp.Controllers
                 if (computeHash[i] != user.PasswordHash[i]) return Unauthorized();
             }
 
-            return user;
+            return new UserDto
+            {
+                Username = user.UserName,
+                Token = tokenService.CreateToken(user)
+            };
 
         }
 

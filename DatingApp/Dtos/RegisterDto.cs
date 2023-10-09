@@ -9,6 +9,7 @@ namespace DatingApp.Dtos
 
 
         [Required]
+        [StringLength(8, MinimumLength = 4)]
         public string Password { get; set; } = string.Empty;
     }
 }

@@ -6,7 +6,7 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
-    //[Authorize]
+    [Authorize]
     public class UsersController : BaseApiController
     {
         private readonly DataContext context;

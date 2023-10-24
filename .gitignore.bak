@@ -482,5 +482,3 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
-appsettings.json

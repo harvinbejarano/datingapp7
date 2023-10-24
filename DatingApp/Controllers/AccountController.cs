@@ -47,7 +47,9 @@ namespace DatingApp.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
-            var user = await this.context.Users.FirstOrDefaultAsync( u => u.UserName == loginDto.Username);
+            var user = await this.context.Users
+                .Include(x => x.Photos)
+                .FirstOrDefaultAsync( u => u.UserName == loginDto.Username);
             
             if(user == null) return Unauthorized();
 
@@ -62,7 +64,8 @@ namespace DatingApp.Controllers
             return new UserDto
             {
                 Username = user.UserName,
-                Token = tokenService.CreateToken(user)
+                Token = tokenService.CreateToken(user),
+                PhotoUrl = user.Photos.FirstOrDefault(f => f.IsMain)?.Url
             };
 
         }

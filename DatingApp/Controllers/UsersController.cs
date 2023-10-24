@@ -79,5 +79,26 @@
 
             return BadRequest("Problem adding photo");
         }
+
+        [HttpPut("set-main-photo/{photoId}")]
+        public async Task<ActionResult> SetMainPhoto(int photoId)
+        {
+            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+            if (user == null) return NotFound();
+
+            var photo = user.Photos.FirstOrDefault( f => f.Id == photoId);
+            if(photo == null) return NotFound();
+
+            if (photo.IsMain) return BadRequest("Already your main photo");
+
+            var currentMain = user.Photos.FirstOrDefault(f => f.IsMain);
+            if(currentMain != null) currentMain.IsMain = false;
+
+            photo.IsMain = true;
+
+            if(await userRepository.SaveAllAsync()) return NoContent();
+
+            return BadRequest("Problem setting main photo");
+        }
     }
 }

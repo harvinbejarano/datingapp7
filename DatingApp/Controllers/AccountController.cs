@@ -1,4 +1,5 @@
-﻿using DatingApp.Data;
+﻿using AutoMapper;
+using DatingApp.Data;
 using DatingApp.Dtos;
 using DatingApp.Entities;
 using DatingApp.Interfaces;
@@ -13,11 +14,16 @@ namespace DatingApp.Controllers
     {
         private readonly DataContext context;
         private readonly ITokenService tokenService;
+        private readonly IMapper mapper;
 
-        public AccountController(DataContext context, ITokenService tokenService)
+        public AccountController(
+            DataContext context, 
+            ITokenService tokenService,
+            IMapper mapper)
         {
             this.context = context;
             this.tokenService = tokenService;
+            this.mapper = mapper;
         }
 
         [HttpPost("register")]
@@ -25,22 +31,23 @@ namespace DatingApp.Controllers
         {
             if( await UserExists(userDto.Username)) return BadRequest("User name is taken!");
 
+            var user = mapper.Map<AppUser>(userDto);
+
             using var hmac = new HMACSHA512();
 
-            var user = new AppUser
-            {
-                UserName = userDto.Username.ToLower(),
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(userDto.Password)),
-                PasswordSalt = hmac.Key
-            };
+            user.UserName = userDto.Username.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(userDto.Password));
+            user.PasswordSalt = hmac.Key;
+
 
             this.context.Users.Add(user);
             await this.context.SaveChangesAsync();
 
             return new UserDto 
             {
-                Username = userDto.Username,
-                Token = tokenService.CreateToken (user)
+                Username = user.UserName,
+                Token = tokenService.CreateToken (user),
+                KnownAs = user.KnownAs
             };
         }
 
@@ -65,7 +72,8 @@ namespace DatingApp.Controllers
             {
                 Username = user.UserName,
                 Token = tokenService.CreateToken(user),
-                PhotoUrl = user.Photos.FirstOrDefault(f => f.IsMain)?.Url
+                PhotoUrl = user.Photos.FirstOrDefault(f => f.IsMain)?.Url,
+                KnownAs = user.KnownAs
             };
 
         }
